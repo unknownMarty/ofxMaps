@@ -75,7 +75,6 @@ public:
 	void update();
 	void draw();
     
-    void clear();
     
     void touchDown(ofTouchEventArgs &touch);
     void touchMoved(ofTouchEventArgs &touch);

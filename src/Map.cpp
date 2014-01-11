@@ -19,53 +19,8 @@
 	
 void Map::update() {
 	// TODO: Move non-drawing logic here
-    /*
-        std::cout << "images:       " << images.size() << std::endl;
-        std::cout << "queue:        " << queue.size() << std::endl;
-        std::cout << "recentImages: " << recentImages.size() << std::endl;
-        std::cout << "visibleKeys:  " << visibleKeys.size() << std::endl;
-        std::cout << "memoryImages:  " << tileLoader->memoryImages.size() << std::endl;
-        std::cout << "-------------------" << std::endl << std::endl;
-     */
-}
-
-void Map::clear()
-{
     
-    /*
-    images.erase(images.begin());
-    images.clear();
-    queue.erase(queue.begin());
-    queue.clear();
-    
-    recentImages.erase(recentImages.begin());
-    recentImages.clear();
-    
-    visibleKeys.erase(visibleKeys.begin());
-    visibleKeys.clear();
-    
-      */
-    
-    tileLoader->memoryImages.clear();
-  
-    
-    /*
-    for(int i = 0; i < tileLoader->threadedLoaders.size(); i++)
-    {
-    
-        tileLoader->threadedLoaders[i]->stopThread();
-        delete tileLoader->threadedLoaders[i];
-    
-    }
-*/
-   // zoomOut();
-    cout<<"zoom level = "<<getZoom()<<endl;
-   
-}
-
-void Map::draw() {
-	
-	// if we're in between zoom levels, we need to choose the nearest:
+    // if we're in between zoom levels, we need to choose the nearest:
 	int baseZoom = ofClamp((int)round(centerCoordinate.zoom), mapProvider->getMinZoom(), mapProvider->getMaxZoom());
     
 	// these are the top left and bottom right tile coordinates
@@ -122,50 +77,16 @@ void Map::draw() {
 						grabTile(zoomed);
 					}
 				}
-                 
                 
                 
-							
+                
+                
 			}
 			
 		} // rows
 	} // columns
 	
-	// TODO: sort by zoom so we draw small zoom levels (big tiles) first:
-	// can this be done with a different comparison function on the visibleKeys set?
-	//Collections.sort(visibleKeys, zoomComparator);
-    
-    glPushMatrix();
-    glRotatef(180.0*rotation/M_PI, 0, 0, 1);
-    
-	int numDrawnImages = 0;
-	std::set<Coordinate>::iterator citer;
-	for (citer = visibleKeys.begin(); citer != visibleKeys.end(); citer++) {
-		Coordinate coord = *citer;
-		
-		double scale = pow(2.0, centerCoordinate.zoom - coord.zoom);
-        ofVec2f tileSize = mapProvider->getTileSize() * scale;
-		ofVec2f center = size * 0.5;
-		Coordinate theCoord = centerCoordinate.zoomTo(coord.zoom);
-		
-		double tx = center.x + (coord.column - theCoord.column) * tileSize.x;
-		double ty = center.y + (coord.row - theCoord.row) * tileSize.y;
-		
-		if (images.count(coord) > 0) {
-			ofFbo tile = images[coord];
-			// we want this image to be at the end of recentImages, if it's already there we'll remove it and then add it again
-            //			recentImages.erase(remove(recentImages.begin(), recentImages.end(), tile), recentImages.end());
-            std::vector<Coordinate>::iterator result = find(recentImages.begin(), recentImages.end(), coord);
-            if (result != recentImages.end()) {
-                recentImages.erase(result);
-            }
-			tile.draw(tx, ty, tileSize.x, tileSize.y );
-			numDrawnImages++;
-			recentImages.push_back(coord);
-		}
-	}
-    
-    glPopMatrix();
+	
 	
 	// stop fetching things we can't see:
 	// (visibleKeys also has the parents and children, if needed, but that shouldn't matter)
@@ -210,7 +131,49 @@ void Map::draw() {
 			}
 		}
 	}
-	
+
+   }
+
+
+void Map::draw() {
+	// TODO: sort by zoom so we draw small zoom levels (big tiles) first:
+	// can this be done with a different comparison function on the visibleKeys set?
+	//Collections.sort(visibleKeys, zoomComparator);
+    
+    numDrawnImages  = 0;
+    
+    glPushMatrix();
+    glRotatef(180.0*rotation/M_PI, 0, 0, 1);
+    
+	int numDrawnImages = 0;
+	std::set<Coordinate>::iterator citer;
+	for (citer = visibleKeys.begin(); citer != visibleKeys.end(); citer++) {
+		Coordinate coord = *citer;
+		
+		double scale = pow(2.0, centerCoordinate.zoom - coord.zoom);
+        ofVec2f tileSize = mapProvider->getTileSize() * scale;
+		ofVec2f center = size * 0.5;
+		Coordinate theCoord = centerCoordinate.zoomTo(coord.zoom);
+		
+		double tx = center.x + (coord.column - theCoord.column) * tileSize.x;
+		double ty = center.y + (coord.row - theCoord.row) * tileSize.y;
+		
+		if (images.count(coord) > 0) {
+			ofFbo tile = images[coord];
+			// we want this image to be at the end of recentImages, if it's already there we'll remove it and then add it again
+            //			recentImages.erase(remove(recentImages.begin(), recentImages.end(), tile), recentImages.end());
+            std::vector<Coordinate>::iterator result = find(recentImages.begin(), recentImages.end(), coord);
+            if (result != recentImages.end()) {
+                recentImages.erase(result);
+            }
+			tile.draw(tx, ty, tileSize.x, tileSize.y );
+			numDrawnImages++;
+			recentImages.push_back(coord);
+		}
+	}
+    
+    glPopMatrix();
+		
 }
 void Map::touchDown(ofTouchEventArgs &touch)
 {
