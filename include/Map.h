@@ -65,6 +65,8 @@ private:
 	void processQueue();
     
     ofPoint beginTouch;
+    map<int,ofVec2f> mPrevTouches;
+    map<int,ofVec2f> touches;
 
 public:	
 	

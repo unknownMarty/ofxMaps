@@ -62,7 +62,9 @@ void Map::update() {
                 bool gotParent = false;
                 
                 
-				for (int i = (int)coord.zoom; i > coord.zoom-1; i--) {
+                int amountZoomsloaded = 2;
+				for (int i = (int)coord.zoom; i > ((mapProvider->getMinZoom() < coord.zoom - amountZoomsloaded)
+                                                   ? coord.zoom - amountZoomsloaded : mapProvider->getMinZoom()); i--) {
 					Coordinate zoomed = coord.zoomTo(i).container();
                     //					if (images.count(zoomed) > 0) {
                     //						visibleKeys.insert(zoomed);
@@ -70,7 +72,7 @@ void Map::update() {
                     //						break;
                     //					}
 					// mark all parent tiles valid
-					
+                    visibleKeys.insert(zoomed);
 					gotParent = true;
 					if (images.count(zoomed) == 0) {
 						// force load of parent tiles we don't already have
@@ -178,11 +180,38 @@ void Map::draw() {
 void Map::touchDown(ofTouchEventArgs &touch)
 {
     beginTouch = touch;
+    mPrevTouches[touch.id] = touch;
+
+    
 }
 
 void Map::touchMoved(ofTouchEventArgs &touch)
 {
+    touches[touch.id] = touch;
+    cout<<touch.id<< ": "<<touch.numTouches<<endl;
+    if (touch.numTouches == 1)
     panBy(touch.x - beginTouch.x, touch.y - beginTouch.y);
+    else if (touch.numTouches == 2)
+    {
+        ofVec2f p0 = touches[0];
+		ofVec2f p1 = touches[1];
+		ofVec2f p2 = mPrevTouches[0];
+		ofVec2f p3 = mPrevTouches[1];
+        
+		double sc = p0.distance(p1) / p2.distance(p3);
+		double r = atan2(p1.y-p0.y,p1.x-p0.x) - atan2(p3.y-p2.y,p3.x-p2.x);
+        
+		ofVec2f endCenter = p0.getInterpolated( p1,0.5);
+		ofVec2f startCenter = p2.getInterpolated( p3,0.5);
+		
+		panBy(endCenter - startCenter);
+		scaleBy(sc, endCenter.x, endCenter.y);
+		rotateBy(r, endCenter.x, endCenter.y);
+        
+        mPrevTouches[0] = p0;
+		mPrevTouches[1] = p1;
+    }
+    
 }
     
     void Map::panBy(const ofVec2f &delta) { panBy(delta.x, delta.y); }
