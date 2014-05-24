@@ -253,6 +253,7 @@ void Map::touchMoved(ofTouchEventArgs &touch)
 		panBy(endCenter - startCenter);
 		scaleBy(sc, endCenter.x, endCenter.y);
 #ifdef ENABLE_ROTATION
+        double r = atan2(p1.y-p0.y,p1.x-p0.x) - atan2(p3.y-p2.y,p3.x-p2.x);
 		rotateBy(r, endCenter.x, endCenter.y);
 #endif
         mPrevTouches[0] = p0;
