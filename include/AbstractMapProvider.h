@@ -36,7 +36,7 @@ public:
     // constraining the tiles for your app should be a separate
     // setting, TODO :)
 	int getMaxZoom() {
-		return 18;
+		return 16;
 	}
 	
 	int getMinZoom() {

@@ -18,10 +18,14 @@
 // limit tiles in memory
 // 256 would be 64 MB, you may want to lower this quite a bit for your app
 // (we'll always keep as many images as needed to fill the screen though)
-#define MAX_IMAGES_TO_KEEP 200
+#define MAX_IMAGES_TO_KEEP 150
 
 // upping this can help appearances when zooming out, but also loads many more tiles
 #define GRID_PADDING 0
+
+// enabling this enables rotation.
+
+#define ENABLE_ROTATION 1
 
 
 class Map {
@@ -34,9 +38,7 @@ private:
 	// pan and zoom
 	Coordinate centerCoordinate;
 	
-	// angle in radians
-	double rotation;
-		
+	
 	// about the tiles
 	MapProviderRef mapProvider;
     
@@ -44,8 +46,7 @@ private:
     TileLoaderRef tileLoader;
 
 	// loaded tiles
-	map<Coordinate,ofFbo> images;
-    
+    map<Coordinate, mapImage >  images;
    
 	
 	// coords waiting to load
@@ -67,9 +68,14 @@ private:
     ofPoint beginTouch;
     map<int,ofVec2f> mPrevTouches;
     map<int,ofVec2f> touches;
+    
+    bool bTouches;
+    bool bIsZooming;
 
 public:	
-	
+	// angle in radians
+	double rotation;
+    
 	Map() {}
 	
     void setup( MapProviderRef _provider,  double _width, double _height );
@@ -80,6 +86,14 @@ public:
     
     void touchDown(ofTouchEventArgs &touch);
     void touchMoved(ofTouchEventArgs &touch);
+    void touchUp(ofTouchEventArgs & touch);
+    void touchDoubleTap(ofTouchEventArgs &touch);
+    
+    void enableTouches();
+    void disableTouches();
+    
+
+    void touchCancelled(ofTouchEventArgs & touch);
     
 	void panBy(const double &x, const double &y);
 	void panBy(const ofVec2f &d);
@@ -89,11 +103,20 @@ public:
 	void rotateBy(const double &r, const double &x, const double &y);
 	void rotateBy(const double &r, const ofVec2f &c);
 	void zoomBy(const double &distance);
+    
 
 	void setZoom(const double &zoom);
 	double getZoom() const; // TODO: maybe int getZoomLevel as well?
+    double getMinZoom(){ return mapProvider->getMinZoom();}
+    double getMaxZoom(){ return mapProvider->getMaxZoom();}
 	Location getCenter() const;
 	Coordinate getCenterCoordinate() const;
+    bool isZooming()
+    {
+        return bIsZooming;
+    }
+    
+    float getRotation() { return rotation;}
 	
 	void setCenter(const Coordinate &center);
 	void setCenter(const Location &location);
