@@ -12,13 +12,13 @@
 
 #include "proj_api.h"
 	
-class OpenStreetMapProvider : public AbstractMapProvider {
+class tilestreamProvider : public AbstractMapProvider {
 	
 private:
 
 	std::vector<std::string> subdomains;
 	    
-	OpenStreetMapProvider(): 
+	tilestreamProvider():
         // this is the projection and transform you'll want for any Google-style map tile source:
         AbstractMapProvider( MercatorProjection::createWebMercator() )
     {
@@ -33,7 +33,7 @@ public:
 	
     static MapProviderRef create()
     {
-        return MapProviderRef( new OpenStreetMapProvider() );
+        return MapProviderRef( new tilestreamProvider() );
     }
 		
 	std::vector<std::string> getTileUrls(const Coordinate &rawCoordinate) {
